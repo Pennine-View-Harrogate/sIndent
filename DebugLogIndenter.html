@@ -33,40 +33,39 @@ var objectIdRegex      = /\|[A-Z0-9]{15}\|/i;
 
 function indentLog() {
 
-    var input = document.getElementById('input').value;
-    var lines = input.split('\n');
-    var outputTableEl = document.getElementById('output');
-    var numOk = 0;
+	var input = document.getElementById('input').value;
+	var lines = input.split('\n');
+	var outputTableEl = document.getElementById('output');
+	var numOk = 0;
 
-    var includeTime         = document.getElementById('includeTime').checked;
-    var includeMicroseconds = document.getElementById('includeMicroseconds').checked;
-    var includeCategory     = document.getElementById('includeCategory').checked;
-    var includeSubcategory  = document.getElementById('includeSubcategory').checked;
-    var includeObjectId     = document.getElementById('includeObjectId').checked;
+	var includeTime         = document.getElementById('includeTime').checked;
+	var includeMicroseconds = document.getElementById('includeMicroseconds').checked;
+	var includeCategory     = document.getElementById('includeCategory').checked;
+	var includeSubcategory  = document.getElementById('includeSubcategory').checked;
+	var includeObjectId     = document.getElementById('includeObjectId').checked;
 
-    indent = 0;
+	indent = 0;
 
     outputTableEl.innerHTML = ''; // Clear
-    for (var i = 0; i < lines.length; i++) {
+	for (var i = 0; i < lines.length; i++) {
 
-        var line = lines[i];
+		var line = lines[i];
 
-        if (timeRegex.test(line)) {
-            outputTableEl.appendChild(indentLine(line, includeTime, includeMicroseconds, includeCategory, includeSubcategory, includeObjectId));
-            ++numOk;
-        }
+		if (timeRegex.test(line)) {
+			outputTableEl.appendChild(indentLine(line, includeTime, includeMicroseconds, includeCategory, includeSubcategory, includeObjectId));
+			++numOk;
+		}
+	}
 
-    }
+	if (indent !== 0)
+	{
+		alert('Error - indent not zero at end: ' + indent);
+	}
 
-    if (indent !== 0)
-    {
-        alert('Error - indent not zero at end: ' + indent);
-    }
-
-    if (input && input.length > 0 && numOk === 0)
-    {
-        alert("Error - didn't understand the input.\n\nPaste a Salesforce Debug Log into the text-area.\n\nYou can paste a full Ctrl-A Ctrl-C copy of the whole Debug Log screen from your browser or from eclipse.");
-    }
+	if (input && input.length > 0 && numOk === 0)
+	{
+		alert("Error - didn't understand the input.\n\nPaste a Salesforce Debug Log into the text-area.\n\nYou can paste a full Ctrl-A Ctrl-C copy of the whole Debug Log screen from your browser or from eclipse.");
+	}
 }
 
 /**
@@ -81,65 +80,65 @@ function indentLog() {
  */
 function indentLine(line, includeTime, includeMicroseconds, includeCategory, includeSubcategory, includeObjectId) {
 
-    var tr = document.createElement('tr');
+	var tr = document.createElement('tr');
 
-    var timeArray = timeRegex.exec(line);
-    var microsecondsArray = microsecondsRegex.exec(line);
-    var categoryArray = categoryRegex.exec(line);
-    var subcategoryArray = subcategoryRegex.exec(line);
-    var objectIdArray = objectIdRegex.exec(line);
+	var timeArray = timeRegex.exec(line);
+	var microsecondsArray = microsecondsRegex.exec(line);
+	var categoryArray = categoryRegex.exec(line);
+	var subcategoryArray = subcategoryRegex.exec(line);
+	var objectIdArray = objectIdRegex.exec(line);
 
-    if (includeTime) tr.appendChild(format(timeArray));
-    if (includeMicroseconds) tr.appendChild(format(microsecondsArray));
-    if (includeObjectId) tr.appendChild(format(objectIdArray));
-    if (includeSubcategory) tr.appendChild(format(subcategoryArray));
-    if (includeCategory) tr.appendChild(format(categoryArray));
+	if (includeTime) tr.appendChild(format(timeArray));
+	if (includeMicroseconds) tr.appendChild(format(microsecondsArray));
+	if (includeObjectId) tr.appendChild(format(objectIdArray));
+	if (includeSubcategory) tr.appendChild(format(subcategoryArray));
+	if (includeCategory) tr.appendChild(format(categoryArray));
 
-    line = line.replace(timeRegex, '');
-    line = line.replace(microsecondsRegex, '');
-    line = line.replace(categoryRegex, '');
-    line = line.replace(subcategoryRegex, '');
-    line = line.replace(objectIdRegex, '');
+	line = line.replace(timeRegex, '');
+	line = line.replace(microsecondsRegex, '');
+	line = line.replace(categoryRegex, '');
+	line = line.replace(subcategoryRegex, '');
+	line = line.replace(objectIdRegex, '');
 
-    var isEntry  = false;
-    var isExit   = false;
+	var isEntry  = false;
+	var isExit   = false;
 
-    if (categoryArray) {
+	if (categoryArray) {
 
-        var category = categoryArray[0];
+		var category = categoryArray[0];
 
-        if (/_ENTRY|_ENTER|DML_BEGIN|SOQL_EXECUTE_BEGIN/.test(category)) {
-            isEntry = true;
-        }
-        else if (/_EXIT|DML_END|SOQL_EXECUTE_END/.test(category)) {
-            isExit = true;
-        }
-        else if (/EXCEPTION_THROWN|FATAL_ERROR/.test(category)) {
-            tr.style.backgroundColor = '#fdd';
-        }
-        else if (/USER_DEBUG/.test(category)) {
-            tr.style.backgroundColor = '#dfd';
-        }
-    }
+		if (/_ENTRY|_ENTER|DML_BEGIN|SOQL_EXECUTE_BEGIN/.test(category)) {
+			isEntry = true;
+		}
+		else if (/_EXIT|DML_END|SOQL_EXECUTE_END/.test(category)) {
+			isExit = true;
+		}
+		else if (/EXCEPTION_THROWN|FATAL_ERROR/.test(category)) {
+			tr.style.backgroundColor = '#fdd';
+		}
+		else if (/USER_DEBUG/.test(category)) {
+			tr.style.backgroundColor = '#dfd';
+		}
+	}
 
-    if (isExit) {
-        indent--;
-    }
+	if (isExit) {
+		indent--;
+	}
 
-    var paddingLeft = indent * 30;
+	var paddingLeft = indent * 30;
 
-    if (indent < 0) {
-        line += " NEGATIVE INDENT ";
-    }
+	if (indent < 0) {
+		line += " NEGATIVE INDENT ";
+	}
 
-    tr.appendChild(formatLog(paddingLeft, cleanUp(line)));
-    output += '<td style="padding-left:' + paddingLeft + 'px;">' + cleanUp(line) + '</td>';
+	tr.appendChild(formatLog(paddingLeft, cleanUp(line)));
+	output += '<td style="padding-left:' + paddingLeft + 'px;">' + cleanUp(line) + '</td>';
 
-    if (isEntry) {
-        indent++;
-    }
+	if (isEntry) {
+		indent++;
+	}
 
-    return tr;
+	return tr;
 }
 
 /**
@@ -149,10 +148,10 @@ function indentLine(line, includeTime, includeMicroseconds, includeCategory, inc
  * @returns {HTMLElement}
  */
 function formatLog(paddingLeft, text){
-    var td = document.createElement('td');
-    td.style.paddingLeft = paddingLeft + 'px';
-    td.appendChild(document.createTextNode(text));
-    return td;
+	var td = document.createElement('td');
+	td.style.paddingLeft = paddingLeft + 'px';
+	td.appendChild(document.createTextNode(text));
+	return td;
 }
 
 /**
@@ -161,27 +160,25 @@ function formatLog(paddingLeft, text){
  * @returns {HTMLTableCellElement}
  */
 function format(resultsArray) {
-    var td = document.createElement('td');
-    if (resultsArray && resultsArray[0]) {
-        var text = cleanUp(resultsArray[0]);
-        td.appendChild(document.createTextNode(text));
-    }
-    else {
-        td.innerHTML = '&nbsp;';
-    }
-    return td;
+	var td = document.createElement('td');
+	if (resultsArray && resultsArray[0]) {
+		var text = cleanUp(resultsArray[0]);
+		td.appendChild(document.createTextNode(text));
+	}
+	else {
+		td.innerHTML = '&nbsp;';
+	}
+	return td;
 }
 
 function cleanUp(text) {
 
-    if (text === null || text === undefined) {
-        return '';
-    }
+	if (text === null || text === undefined) {
+		return '';
+	}
 
-    return text.replace(/\|/, '').replace(/\|$/, '');
+	return text.replace(/\|/, '').replace(/\|$/, '');
 }
-
-return indentLog;
 
 </script>
 
